@@ -86,17 +86,17 @@ class CementNotifier extends StateNotifier<CementState> {
     final bLFt = state.brickLength * brickSizeUnitToFeet[state.brickSizeUnit]!;
     final bWFt = state.brickWidth * brickSizeUnitToFeet[state.brickSizeUnit]!;
     final bHFt = state.brickHeight * brickSizeUnitToFeet[state.brickSizeUnit]!;
+    const jointFt = 0.5 / 12.0; // standard 0.5 inch mortar joint
 
     final wallHeightFt = layers * bHFt;
-    final wallThicknessFt = 2 * bWFt; // double wythe (same as brick calculator)
-    final perimeter = 2 * (lFt + bFt);
-    final wallVolumeCft = perimeter * wallHeightFt * wallThicknessFt;
 
     final bricksPerLayer = ((lFt / bLFt).ceil() * 2 + (bFt / bLFt).ceil() * 2) * 2;
     final numBricks = bricksPerLayer * layers;
-    final brickVolumeCft = numBricks * bLFt * bWFt * bHFt;
 
-    final mortarWet = (wallVolumeCft - brickVolumeCft) * 1.20; // 20% wastage
+    // Mortar volume = (effective brick unit with joints) - (bare brick volume), per brick
+    final brickVol = bLFt * bWFt * bHFt;
+    final effectiveVol = (bLFt + jointFt) * (bWFt + jointFt) * (bHFt + jointFt);
+    final mortarWet = numBricks * (effectiveVol - brickVol) * 1.20; // 20% wastage
     final mortarDry = mortarWet * 1.33;
     final N = state.mortarRatio;
     final cementCft = mortarDry / (1 + N);

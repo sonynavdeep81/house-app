@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:house_app/features/brick_calculator/presentation/brick_screen.dart';
+import 'package:house_app/features/cement_calculator/presentation/cement_screen.dart';
 import 'package:house_app/features/converter/presentation/converter_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static const _screens = [
     ConverterScreen(),
     BrickScreen(),
+    CementScreen(),
   ];
 
   @override
@@ -32,6 +34,10 @@ class _HomeScreenState extends State<HomeScreen> {
           NavigationDestination(
             icon: Icon(Icons.home_work),
             label: 'Bricks',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.water_drop),
+            label: 'Cement',
           ),
         ],
       ),

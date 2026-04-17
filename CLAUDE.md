@@ -27,7 +27,8 @@ APK is auto-copied to `/home/navdeep/House/house-app.apk` after each build.
 | Unit | Sq Ft |
 |------|-------|
 | Biswansi | 27.225 |
-| Marla | 272.25 |
+| Small Marla | 225.0 |
+| Big Marla | 272.25 |
 | Biswa | 544.5 |
 | Kanal | 5,445 |
 | Bigha | 10,890 |

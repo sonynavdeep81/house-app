@@ -13,7 +13,7 @@ class ConverterState {
 
   const ConverterState({
     this.mode = ConverterMode.area,
-    this.fromUnit = 'Marla',
+    this.fromUnit = 'Small Marla',
     this.toUnit = 'Sq Ft',
     this.lengthUnit = 'Feet',
     this.breadthUnit = 'Feet',

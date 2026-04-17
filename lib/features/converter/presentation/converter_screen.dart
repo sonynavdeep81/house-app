@@ -99,14 +99,17 @@ class _ConverterScreenState extends ConsumerState<ConverterScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    _UnitDropdown(
-                      label: 'Unit',
-                      value: state.lengthUnit,
-                      items: lengthToFeet.keys.toList(),
-                      onChanged: (v) {
-                        notifier.setLengthUnit(v!);
-                        notifier.clearResult();
-                      },
+                    SizedBox(
+                      width: 140,
+                      child: _UnitDropdown(
+                        label: 'Unit',
+                        value: state.lengthUnit,
+                        items: lengthToFeet.keys.toList(),
+                        onChanged: (v) {
+                          notifier.setLengthUnit(v!);
+                          notifier.clearResult();
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -121,14 +124,17 @@ class _ConverterScreenState extends ConsumerState<ConverterScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    _UnitDropdown(
-                      label: 'Unit',
-                      value: state.breadthUnit,
-                      items: lengthToFeet.keys.toList(),
-                      onChanged: (v) {
-                        notifier.setBreadthUnit(v!);
-                        notifier.clearResult();
-                      },
+                    SizedBox(
+                      width: 140,
+                      child: _UnitDropdown(
+                        label: 'Unit',
+                        value: state.breadthUnit,
+                        items: lengthToFeet.keys.toList(),
+                        onChanged: (v) {
+                          notifier.setBreadthUnit(v!);
+                          notifier.clearResult();
+                        },
+                      ),
                     ),
                   ],
                 ),

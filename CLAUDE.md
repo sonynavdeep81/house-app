@@ -9,12 +9,14 @@ Flutter app for house construction in Punjab, India. Android APK only.
 Feature-based under `lib/features/`. Each feature is self-contained:
 ```
 lib/
-├── core/theme/     app_theme.dart
-├── core/router/    app_router.dart (go_router)
+├── core/theme/           app_theme.dart
+├── core/router/          app_router.dart (go_router)
+├── core/presentation/    home_screen.dart (BottomNavigationBar shell)
 └── features/
-    └── converter/  Unit converter (Feature 1)
+    ├── converter/         Unit converter (Feature 1)
+    └── brick_calculator/  Brick calculator (Feature 2)
 ```
-State: Riverpod (`StateNotifierProvider`). Routing: go_router.
+State: Riverpod (`StateNotifierProvider`). Routing: go_router. Navigation: `NavigationBar` (Material 3) in `HomeScreen`.
 
 ## Build
 Use Gradle (NOT `flutter build apk` — gets stuck on initialization):
@@ -49,3 +51,4 @@ APK is auto-copied to `/home/navdeep/House/house-app.apk` after each build.
 
 ## Features
 - [x] Feature 1: Land unit converter (area ↔ area, L×B → area)
+- [x] Feature 2: Brick calculator — boundary wall bricks, wall height, cost estimate. Custom brick dimensions (default 9×4×4 inches), 2 parallel rows.

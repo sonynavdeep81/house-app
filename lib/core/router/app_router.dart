@@ -1,12 +1,12 @@
 import 'package:go_router/go_router.dart';
-import 'package:house_app/features/converter/presentation/converter_screen.dart';
+import 'package:house_app/core/presentation/home_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const ConverterScreen(),
+      builder: (context, state) => const HomeScreen(),
     ),
   ],
 );

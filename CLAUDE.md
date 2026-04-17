@@ -34,8 +34,15 @@ APK is auto-copied to `/home/navdeep/House/house-app.apk` after each build.
 | Acre | 43,560 |
 | Murabba | 1,089,000 |
 
+## Validation (after every feature)
+1. Build: `cd android && ./gradlew copyApkToProject`
+2. Install: `adb install -r /home/navdeep/House/house-app.apk`
+3. Launch: `adb shell am start -n com.navdeep.house_app/.MainActivity`
+4. Screenshot: `adb exec-out screencap -p > /tmp/screen.png` — visually verify UI and test conversions
+5. Emulator: `NutriTrack_Pixel` — launch with `flutter emulators --launch NutriTrack_Pixel`
+
 ## Rules
-- After each feature: update CLAUDE.md, commit, push to GitHub
+- After each feature: build → validate on emulator → update CLAUDE.md → commit → push
 - Use Gradle for builds (flutter CLI hangs on initialization — do not use)
 - Keep CLAUDE.md minimal, no duplicates
 

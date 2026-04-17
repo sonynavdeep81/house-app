@@ -1,44 +1,51 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../converter/data/conversion_data.dart';
 
+// Brick size unit → conversion factor to feet
+const Map<String, double> brickSizeUnitToFeet = {
+  'in': 1 / 12.0,
+  'cm': 1 / 30.48,
+  'mm': 1 / 304.8,
+};
+
 class BrickState {
-  final String lengthUnit;
-  final String breadthUnit;
-  final double brickLengthIn;
-  final double brickWidthIn;
-  final double brickHeightIn;
+  final String plotLengthUnit;
+  final String brickSizeUnit;
+  final double brickLength;
+  final double brickWidth;
+  final double brickHeight;
   final int? totalBricks;
   final double? totalCost;
   final double? wallHeightFt;
 
   const BrickState({
-    this.lengthUnit = 'Feet',
-    this.breadthUnit = 'Feet',
-    this.brickLengthIn = 9.0,
-    this.brickWidthIn = 4.0,
-    this.brickHeightIn = 4.0,
+    this.plotLengthUnit = 'Feet',
+    this.brickSizeUnit = 'in',
+    this.brickLength = 9.0,
+    this.brickWidth = 4.0,
+    this.brickHeight = 4.0,
     this.totalBricks,
     this.totalCost,
     this.wallHeightFt,
   });
 
   BrickState copyWith({
-    String? lengthUnit,
-    String? breadthUnit,
-    double? brickLengthIn,
-    double? brickWidthIn,
-    double? brickHeightIn,
+    String? plotLengthUnit,
+    String? brickSizeUnit,
+    double? brickLength,
+    double? brickWidth,
+    double? brickHeight,
     int? totalBricks,
     double? totalCost,
     double? wallHeightFt,
     bool clearResult = false,
   }) =>
       BrickState(
-        lengthUnit: lengthUnit ?? this.lengthUnit,
-        breadthUnit: breadthUnit ?? this.breadthUnit,
-        brickLengthIn: brickLengthIn ?? this.brickLengthIn,
-        brickWidthIn: brickWidthIn ?? this.brickWidthIn,
-        brickHeightIn: brickHeightIn ?? this.brickHeightIn,
+        plotLengthUnit: plotLengthUnit ?? this.plotLengthUnit,
+        brickSizeUnit: brickSizeUnit ?? this.brickSizeUnit,
+        brickLength: brickLength ?? this.brickLength,
+        brickWidth: brickWidth ?? this.brickWidth,
+        brickHeight: brickHeight ?? this.brickHeight,
         totalBricks: clearResult ? null : (totalBricks ?? this.totalBricks),
         totalCost: clearResult ? null : (totalCost ?? this.totalCost),
         wallHeightFt: clearResult ? null : (wallHeightFt ?? this.wallHeightFt),
@@ -48,11 +55,11 @@ class BrickState {
 class BrickNotifier extends StateNotifier<BrickState> {
   BrickNotifier() : super(const BrickState());
 
-  void setLengthUnit(String u) => state = state.copyWith(lengthUnit: u, clearResult: true);
-  void setBreadthUnit(String u) => state = state.copyWith(breadthUnit: u, clearResult: true);
-  void setBrickLength(double v) => state = state.copyWith(brickLengthIn: v, clearResult: true);
-  void setBrickWidth(double v) => state = state.copyWith(brickWidthIn: v, clearResult: true);
-  void setBrickHeight(double v) => state = state.copyWith(brickHeightIn: v, clearResult: true);
+  void setPlotLengthUnit(String u) => state = state.copyWith(plotLengthUnit: u, clearResult: true);
+  void setBrickSizeUnit(String u) => state = state.copyWith(brickSizeUnit: u, clearResult: true);
+  void setBrickLength(double v) => state = state.copyWith(brickLength: v, clearResult: true);
+  void setBrickWidth(double v) => state = state.copyWith(brickWidth: v, clearResult: true);
+  void setBrickHeight(double v) => state = state.copyWith(brickHeight: v, clearResult: true);
 
   void calculate({
     required double length,
@@ -60,17 +67,17 @@ class BrickNotifier extends StateNotifier<BrickState> {
     required int layers,
     double? costPer1000,
   }) {
-    final lFt = length * lengthToFeet[state.lengthUnit]!;
-    final bFt = breadth * lengthToFeet[state.breadthUnit]!;
+    final toFt = brickSizeUnitToFeet[state.brickSizeUnit]!;
+    final lFt = length * lengthToFeet[state.plotLengthUnit]!;
+    final bFt = breadth * lengthToFeet[state.plotLengthUnit]!;
 
-    final brickLengthFt = state.brickLengthIn / 12.0;
-    final brickHeightFt = state.brickHeightIn / 12.0;
+    final brickLengthFt = state.brickLength * toFt;
+    final brickHeightFt = state.brickHeight * toFt;
 
     final bricksPerLengthWall = (lFt / brickLengthFt).ceil() * 2;
     final bricksPerBreadthWall = (bFt / brickLengthFt).ceil() * 2;
     final bricksPerLayer = (bricksPerLengthWall + bricksPerBreadthWall) * 2;
     final total = bricksPerLayer * layers;
-
     final wallHeight = layers * brickHeightFt;
 
     double? cost;
@@ -86,11 +93,11 @@ class BrickNotifier extends StateNotifier<BrickState> {
   }
 
   void clear() => state = BrickState(
-        lengthUnit: state.lengthUnit,
-        breadthUnit: state.breadthUnit,
-        brickLengthIn: state.brickLengthIn,
-        brickWidthIn: state.brickWidthIn,
-        brickHeightIn: state.brickHeightIn,
+        plotLengthUnit: state.plotLengthUnit,
+        brickSizeUnit: state.brickSizeUnit,
+        brickLength: state.brickLength,
+        brickWidth: state.brickWidth,
+        brickHeight: state.brickHeight,
       );
 }
 

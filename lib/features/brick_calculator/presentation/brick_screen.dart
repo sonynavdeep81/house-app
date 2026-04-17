@@ -62,7 +62,8 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
     final state = ref.watch(brickProvider);
     final notifier = ref.read(brickProvider.notifier);
     final theme = Theme.of(context);
-    final units = lengthToFeet.keys.toList();
+    final plotUnits = lengthToFeet.keys.toList();
+    final brickUnits = brickSizeUnitToFeet.keys.toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -77,35 +78,52 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _sectionLabel(context, 'Brick Size (inches)'),
+              _sectionLabel(context, 'Brick Size'),
               const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: state.brickSizeUnit,
+                decoration: const InputDecoration(
+                  labelText: 'Unit (for all brick dimensions)',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+                items: brickUnits
+                    .map((u) => DropdownMenuItem(value: u, child: Text(u)))
+                    .toList(),
+                onChanged: (v) {
+                  notifier.setBrickSizeUnit(v!);
+                  notifier.clear();
+                },
+              ),
+              const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(child: _InchField(controller: _brickLCtrl, label: 'Length')),
+                  Expanded(child: _DimField(controller: _brickLCtrl, label: 'Length')),
                   const SizedBox(width: 8),
-                  Expanded(child: _InchField(controller: _brickWCtrl, label: 'Width')),
+                  Expanded(child: _DimField(controller: _brickWCtrl, label: 'Width')),
                   const SizedBox(width: 8),
-                  Expanded(child: _InchField(controller: _brickHCtrl, label: 'Height')),
+                  Expanded(child: _DimField(controller: _brickHCtrl, label: 'Height')),
                 ],
               ),
               const SizedBox(height: 16),
               _sectionLabel(context, 'Plot Dimensions'),
               const SizedBox(height: 8),
-              _DimRow(
-                label: 'Length',
-                controller: _lengthCtrl,
-                unit: state.lengthUnit,
-                units: units,
-                onUnitChanged: (v) => notifier.setLengthUnit(v!),
+              DropdownButtonFormField<String>(
+                value: state.plotLengthUnit,
+                decoration: const InputDecoration(
+                  labelText: 'Unit (for both dimensions)',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+                items: plotUnits
+                    .map((u) => DropdownMenuItem(value: u, child: Text(u)))
+                    .toList(),
+                onChanged: (v) => notifier.setPlotLengthUnit(v!),
               ),
               const SizedBox(height: 12),
-              _DimRow(
-                label: 'Breadth',
-                controller: _breadthCtrl,
-                unit: state.breadthUnit,
-                units: units,
-                onUnitChanged: (v) => notifier.setBreadthUnit(v!),
-              ),
+              _NumField(controller: _lengthCtrl, label: 'Length', hint: 'e.g. 60'),
+              const SizedBox(height: 12),
+              _NumField(controller: _breadthCtrl, label: 'Breadth', hint: 'e.g. 30'),
               const SizedBox(height: 16),
               _sectionLabel(context, 'Wall Details'),
               const SizedBox(height: 8),
@@ -159,11 +177,11 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
       );
 }
 
-class _InchField extends StatelessWidget {
+class _DimField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
 
-  const _InchField({required this.controller, required this.label});
+  const _DimField({required this.controller, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +190,6 @@ class _InchField extends StatelessWidget {
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(
         labelText: label,
-        suffixText: 'in',
         border: const OutlineInputBorder(),
         contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
       ),
@@ -182,45 +199,6 @@ class _InchField extends StatelessWidget {
         if (n == null || n <= 0) return 'Invalid';
         return null;
       },
-    );
-  }
-}
-
-class _DimRow extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String unit;
-  final List<String> units;
-  final ValueChanged<String?> onUnitChanged;
-
-  const _DimRow({
-    required this.label,
-    required this.controller,
-    required this.unit,
-    required this.units,
-    required this.onUnitChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(child: _NumField(controller: controller, label: label, hint: 'e.g. 60')),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 140,
-          child: DropdownButtonFormField<String>(
-            value: unit,
-            decoration: const InputDecoration(
-              labelText: 'Unit',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
-            items: units.map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
-            onChanged: onUnitChanged,
-          ),
-        ),
-      ],
     );
   }
 }

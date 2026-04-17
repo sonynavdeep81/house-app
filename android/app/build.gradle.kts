@@ -42,3 +42,13 @@ android {
 flutter {
     source = "../.."
 }
+
+tasks.register("copyApkToProject") {
+    dependsOn("assembleRelease")
+    doLast {
+        val apk = file("${buildDir}/outputs/apk/release/app-release.apk")
+        val dest = file("${rootDir}/../house-app.apk")
+        apk.copyTo(dest, overwrite = true)
+        println("APK copied to: ${dest.absolutePath}")
+    }
+}

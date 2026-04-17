@@ -19,9 +19,9 @@ State: Riverpod (`StateNotifierProvider`). Routing: go_router.
 ## Build
 Use Gradle (NOT `flutter build apk` — gets stuck on initialization):
 ```bash
-cd android && ./gradlew assembleRelease
+cd android && ./gradlew copyApkToProject
 ```
-APK output: `build/app/outputs/apk/release/app-release.apk`
+APK is auto-copied to `/home/navdeep/House/house-app.apk` after each build.
 
 ## Punjab Land Units (base = sq ft)
 | Unit | Sq Ft |

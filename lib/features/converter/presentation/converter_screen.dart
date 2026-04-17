@@ -89,54 +89,26 @@ class _ConverterScreenState extends ConsumerState<ConverterScreen> {
                   hint: 'Enter area in ${state.fromUnit}',
                 ),
               ] else ...[
-                Row(
-                  children: [
-                    Expanded(
-                      child: _NumField(
-                        controller: _lengthCtrl,
-                        label: 'Length',
-                        hint: 'e.g. 50',
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      width: 140,
-                      child: _UnitDropdown(
-                        label: 'Unit',
-                        value: state.lengthUnit,
-                        items: lengthToFeet.keys.toList(),
-                        onChanged: (v) {
-                          notifier.setLengthUnit(v!);
-                          notifier.clearResult();
-                        },
-                      ),
-                    ),
-                  ],
+                _UnitDropdown(
+                  label: 'Unit (for both dimensions)',
+                  value: state.lengthUnit,
+                  items: lengthToFeet.keys.toList(),
+                  onChanged: (v) {
+                    notifier.setLengthUnit(v!);
+                    notifier.clearResult();
+                  },
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _NumField(
-                        controller: _breadthCtrl,
-                        label: 'Breadth',
-                        hint: 'e.g. 30',
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      width: 140,
-                      child: _UnitDropdown(
-                        label: 'Unit',
-                        value: state.breadthUnit,
-                        items: lengthToFeet.keys.toList(),
-                        onChanged: (v) {
-                          notifier.setBreadthUnit(v!);
-                          notifier.clearResult();
-                        },
-                      ),
-                    ),
-                  ],
+                _NumField(
+                  controller: _lengthCtrl,
+                  label: 'Length',
+                  hint: 'e.g. 50',
+                ),
+                const SizedBox(height: 12),
+                _NumField(
+                  controller: _breadthCtrl,
+                  label: 'Breadth',
+                  hint: 'e.g. 30',
                 ),
               ],
               const SizedBox(height: 16),

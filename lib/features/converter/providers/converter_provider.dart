@@ -8,7 +8,6 @@ class ConverterState {
   final String fromUnit;
   final String toUnit;
   final String lengthUnit;
-  final String breadthUnit;
   final double? result;
 
   const ConverterState({
@@ -16,7 +15,6 @@ class ConverterState {
     this.fromUnit = 'Small Marla',
     this.toUnit = 'Sq Ft',
     this.lengthUnit = 'Feet',
-    this.breadthUnit = 'Feet',
     this.result,
   });
 
@@ -25,7 +23,6 @@ class ConverterState {
     String? fromUnit,
     String? toUnit,
     String? lengthUnit,
-    String? breadthUnit,
     double? result,
   }) =>
       ConverterState(
@@ -33,7 +30,6 @@ class ConverterState {
         fromUnit: fromUnit ?? this.fromUnit,
         toUnit: toUnit ?? this.toUnit,
         lengthUnit: lengthUnit ?? this.lengthUnit,
-        breadthUnit: breadthUnit ?? this.breadthUnit,
         result: result ?? this.result,
       );
 }
@@ -45,7 +41,6 @@ class ConverterNotifier extends StateNotifier<ConverterState> {
   void setFromUnit(String u) => state = state.copyWith(fromUnit: u);
   void setToUnit(String u) => state = state.copyWith(toUnit: u);
   void setLengthUnit(String u) => state = state.copyWith(lengthUnit: u);
-  void setBreadthUnit(String u) => state = state.copyWith(breadthUnit: u);
 
   void calculateArea(double value) {
     final r = convertArea(value, state.fromUnit, state.toUnit);
@@ -55,7 +50,7 @@ class ConverterNotifier extends StateNotifier<ConverterState> {
   void calculateFromLengthBreadth(double length, double breadth) {
     final r = lengthBreadthToArea(
       length, state.lengthUnit,
-      breadth, state.breadthUnit,
+      breadth, state.lengthUnit,
       state.toUnit,
     );
     state = state.copyWith(result: r);
@@ -66,7 +61,6 @@ class ConverterNotifier extends StateNotifier<ConverterState> {
         fromUnit: state.fromUnit,
         toUnit: state.toUnit,
         lengthUnit: state.lengthUnit,
-        breadthUnit: state.breadthUnit,
       );
 }
 

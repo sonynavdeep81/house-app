@@ -11,6 +11,7 @@ class CementState {
   final WallInputMode wallInputMode;
   final String wallHeightUnit;
   final int mortarRatio;
+  final double bagWeightKg;
   final int? cementBags;
   final double? sandCft;
   final double? cementCost;
@@ -27,6 +28,7 @@ class CementState {
     this.wallInputMode = WallInputMode.layers,
     this.wallHeightUnit = 'Feet',
     this.mortarRatio = 6,
+    this.bagWeightKg = 50.0,
     this.cementBags,
     this.sandCft,
     this.cementCost,
@@ -44,6 +46,7 @@ class CementState {
     WallInputMode? wallInputMode,
     String? wallHeightUnit,
     int? mortarRatio,
+    double? bagWeightKg,
     int? cementBags,
     double? sandCft,
     double? cementCost,
@@ -61,6 +64,7 @@ class CementState {
         wallInputMode: wallInputMode ?? this.wallInputMode,
         wallHeightUnit: wallHeightUnit ?? this.wallHeightUnit,
         mortarRatio: mortarRatio ?? this.mortarRatio,
+        bagWeightKg: bagWeightKg ?? this.bagWeightKg,
         cementBags: clearResult ? null : (cementBags ?? this.cementBags),
         sandCft: clearResult ? null : (sandCft ?? this.sandCft),
         cementCost: clearResult ? null : (cementCost ?? this.cementCost),
@@ -81,27 +85,34 @@ class CementNotifier extends StateNotifier<CementState> {
   void setWallInputMode(WallInputMode m) => state = state.copyWith(wallInputMode: m, clearResult: true);
   void setWallHeightUnit(String u) => state = state.copyWith(wallHeightUnit: u, clearResult: true);
   void setMortarRatio(int r) => state = state.copyWith(mortarRatio: r, clearResult: true);
+  void setBagWeight(double v) => state = state.copyWith(bagWeightKg: v, clearResult: true);
 
   void _compute(double lFt, double bFt, int layers, double? cementCostPerBag, double? sandCostPerCft) {
     final bLFt = state.brickLength * brickSizeUnitToFeet[state.brickSizeUnit]!;
     final bWFt = state.brickWidth * brickSizeUnitToFeet[state.brickSizeUnit]!;
     final bHFt = state.brickHeight * brickSizeUnitToFeet[state.brickSizeUnit]!;
-    const jointFt = 0.5 / 12.0; // standard 0.5 inch mortar joint
 
     final wallHeightFt = layers * bHFt;
 
+    // Bricks per layer: same formula as brick calculator
     final bricksPerLayer = ((lFt / bLFt).ceil() * 2 + (bFt / bLFt).ceil() * 2) * 2;
     final numBricks = bricksPerLayer * layers;
 
-    // Mortar volume = (effective brick unit with joints) - (bare brick volume), per brick
-    final brickVol = bLFt * bWFt * bHFt;
-    final effectiveVol = (bLFt + jointFt) * (bWFt + jointFt) * (bHFt + jointFt);
-    final mortarWet = numBricks * (effectiveVol - brickVol) * 1.20; // 20% wastage
-    final mortarDry = mortarWet * 1.33;
+    // Wall thickness = brick length (9 in) — two bricks placed width-to-width with mortar = 9 in total
+    final wallThicknessFt = bLFt;
+    final perimeter = 2 * (lFt + bFt);
+    final wallVolumeCft = perimeter * wallHeightFt * wallThicknessFt;
+    final brickVolumeCft = numBricks * bLFt * bWFt * bHFt;
+
+    final mortarWet = (wallVolumeCft - brickVolumeCft) * 1.20; // +20% wastage
+    final mortarDry = mortarWet * 1.33; // dry volume factor
     final N = state.mortarRatio;
     final cementCft = mortarDry / (1 + N);
     final sandCft = mortarDry * N / (1 + N);
-    final cementBags = (cementCft / 1.25).ceil(); // 1 bag = 1.25 cft
+
+    // kg ÷ 40 = cft  (50 kg bag = 1.25 cft)
+    final cftPerBag = state.bagWeightKg / 40.0;
+    final cementBags = (cementCft / cftPerBag).ceil();
 
     final cc = (cementCostPerBag != null && cementCostPerBag > 0) ? cementBags * cementCostPerBag : null;
     final sc = (sandCostPerCft != null && sandCostPerCft > 0) ? sandCft * sandCostPerCft : null;
@@ -152,6 +163,7 @@ class CementNotifier extends StateNotifier<CementState> {
         wallInputMode: state.wallInputMode,
         wallHeightUnit: state.wallHeightUnit,
         mortarRatio: state.mortarRatio,
+        bagWeightKg: state.bagWeightKg,
       );
 }
 

@@ -22,6 +22,7 @@ class _CementScreenState extends ConsumerState<CementScreen> {
   final _brickLCtrl = TextEditingController(text: '9');
   final _brickWCtrl = TextEditingController(text: '4');
   final _brickHCtrl = TextEditingController(text: '4');
+  final _bagWeightCtrl = TextEditingController(text: '50');
 
   @override
   void dispose() {
@@ -34,6 +35,7 @@ class _CementScreenState extends ConsumerState<CementScreen> {
     _brickLCtrl.dispose();
     _brickWCtrl.dispose();
     _brickHCtrl.dispose();
+    _bagWeightCtrl.dispose();
     super.dispose();
   }
 
@@ -43,6 +45,7 @@ class _CementScreenState extends ConsumerState<CementScreen> {
     notifier.setBrickLength(double.parse(_brickLCtrl.text));
     notifier.setBrickWidth(double.parse(_brickWCtrl.text));
     notifier.setBrickHeight(double.parse(_brickHCtrl.text));
+    notifier.setBagWeight(double.parse(_bagWeightCtrl.text));
     final cc = _cementCostCtrl.text.isNotEmpty ? double.tryParse(_cementCostCtrl.text) : null;
     final sc = _sandCostCtrl.text.isNotEmpty ? double.tryParse(_sandCostCtrl.text) : null;
     final state = ref.read(cementProvider);
@@ -76,6 +79,7 @@ class _CementScreenState extends ConsumerState<CementScreen> {
     _brickLCtrl.text = '9';
     _brickWCtrl.text = '4';
     _brickHCtrl.text = '4';
+    _bagWeightCtrl.text = '50';
     ref.read(cementProvider.notifier).clear();
   }
 
@@ -210,6 +214,16 @@ class _CementScreenState extends ConsumerState<CementScreen> {
               ),
               const SizedBox(height: 16),
 
+              _sectionLabel(context, 'Cement Bag Weight'),
+              const SizedBox(height: 8),
+              _NumField(
+                controller: _bagWeightCtrl,
+                label: 'Bag Weight (kg)',
+                hint: 'e.g. 50',
+                helperText: 'kg ÷ 40 = cft  (50 kg = 1.25 cft)',
+              ),
+              const SizedBox(height: 16),
+
               _sectionLabel(context, 'Cost (optional)'),
               const SizedBox(height: 8),
               _NumField(
@@ -291,6 +305,7 @@ class _NumField extends StatelessWidget {
   final String hint;
   final bool isInt;
   final bool required;
+  final String? helperText;
 
   const _NumField({
     required this.controller,
@@ -298,6 +313,7 @@ class _NumField extends StatelessWidget {
     required this.hint,
     this.isInt = false,
     this.required = true,
+    this.helperText,
   });
 
   @override
@@ -310,6 +326,7 @@ class _NumField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
+        helperText: helperText,
         border: const OutlineInputBorder(),
       ),
       validator: (v) {

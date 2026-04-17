@@ -41,13 +41,15 @@ APK is auto-copied to `/home/navdeep/House/house-app.apk` after each build.
 1. Build: `cd android && ./gradlew copyApkToProject`
 2. Install: `adb install -r /home/navdeep/House/house-app.apk`
 3. Launch: `adb shell am start -n com.navdeep.house_app/.MainActivity`
-4. Screenshot: `adb exec-out screencap -p > /tmp/screen.png` — visually verify UI and test conversions
+4. Screenshot: `adb shell screencap -p /sdcard/s.png && adb pull /sdcard/s.png /tmp/s.png` — visually verify UI
 5. Emulator: `NutriTrack_Pixel` — launch with `flutter emulators --launch NutriTrack_Pixel`
 
 ## Rules
-- After each feature: build → validate on emulator → update CLAUDE.md → commit → push
+- After each feature: build → validate on emulator → update CLAUDE.md → commit → push to GitHub
 - Use Gradle for builds (flutter CLI hangs on initialization — do not use)
 - Keep CLAUDE.md minimal, no duplicates
+- `adb exec-out screencap -p > file.png` produces empty files — do not use
+- Always add new features one at a time; keep architecture scalable
 
 ## Features
 - [x] Feature 1: Land unit converter (area ↔ area, L×B → area)

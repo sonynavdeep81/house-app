@@ -15,6 +15,7 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
   final _lengthCtrl = TextEditingController();
   final _breadthCtrl = TextEditingController();
   final _layersCtrl = TextEditingController();
+  final _wallHeightCtrl = TextEditingController();
   final _costCtrl = TextEditingController();
   final _brickLCtrl = TextEditingController(text: '9');
   final _brickWCtrl = TextEditingController(text: '4');
@@ -25,6 +26,7 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
     _lengthCtrl.dispose();
     _breadthCtrl.dispose();
     _layersCtrl.dispose();
+    _wallHeightCtrl.dispose();
     _costCtrl.dispose();
     _brickLCtrl.dispose();
     _brickWCtrl.dispose();
@@ -38,18 +40,31 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
     notifier.setBrickLength(double.parse(_brickLCtrl.text));
     notifier.setBrickWidth(double.parse(_brickWCtrl.text));
     notifier.setBrickHeight(double.parse(_brickHCtrl.text));
-    notifier.calculate(
-      length: double.parse(_lengthCtrl.text),
-      breadth: double.parse(_breadthCtrl.text),
-      layers: int.parse(_layersCtrl.text),
-      costPer1000: _costCtrl.text.isNotEmpty ? double.tryParse(_costCtrl.text) : null,
-    );
+    final cost = _costCtrl.text.isNotEmpty ? double.tryParse(_costCtrl.text) : null;
+    final state = ref.read(brickProvider);
+
+    if (state.wallInputMode == WallInputMode.layers) {
+      notifier.calculateFromLayers(
+        length: double.parse(_lengthCtrl.text),
+        breadth: double.parse(_breadthCtrl.text),
+        layers: int.parse(_layersCtrl.text),
+        costPer1000: cost,
+      );
+    } else {
+      notifier.calculateFromHeight(
+        length: double.parse(_lengthCtrl.text),
+        breadth: double.parse(_breadthCtrl.text),
+        wallHeight: double.parse(_wallHeightCtrl.text),
+        costPer1000: cost,
+      );
+    }
   }
 
   void _clear() {
     _lengthCtrl.clear();
     _breadthCtrl.clear();
     _layersCtrl.clear();
+    _wallHeightCtrl.clear();
     _costCtrl.clear();
     _brickLCtrl.text = '9';
     _brickWCtrl.text = '4';
@@ -62,8 +77,6 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
     final state = ref.watch(brickProvider);
     final notifier = ref.read(brickProvider.notifier);
     final theme = Theme.of(context);
-    final plotUnits = lengthToFeet.keys.toList();
-    final brickUnits = brickSizeUnitToFeet.keys.toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -78,6 +91,7 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Brick Size
               _sectionLabel(context, 'Brick Size'),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
@@ -87,13 +101,10 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
-                items: brickUnits
+                items: brickSizeUnitToFeet.keys
                     .map((u) => DropdownMenuItem(value: u, child: Text(u)))
                     .toList(),
-                onChanged: (v) {
-                  notifier.setBrickSizeUnit(v!);
-                  notifier.clear();
-                },
+                onChanged: (v) { notifier.setBrickSizeUnit(v!); notifier.clear(); },
               ),
               const SizedBox(height: 12),
               Row(
@@ -106,6 +117,8 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
                 ],
               ),
               const SizedBox(height: 16),
+
+              // Plot Dimensions
               _sectionLabel(context, 'Plot Dimensions'),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
@@ -115,7 +128,7 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
-                items: plotUnits
+                items: lengthToFeet.keys
                     .map((u) => DropdownMenuItem(value: u, child: Text(u)))
                     .toList(),
                 onChanged: (v) => notifier.setPlotLengthUnit(v!),
@@ -125,14 +138,59 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
               const SizedBox(height: 12),
               _NumField(controller: _breadthCtrl, label: 'Breadth', hint: 'e.g. 30'),
               const SizedBox(height: 16),
+
+              // Wall Details with mode toggle
               _sectionLabel(context, 'Wall Details'),
               const SizedBox(height: 8),
-              _NumField(
-                controller: _layersCtrl,
-                label: 'Number of Layers',
-                hint: 'e.g. 4',
-                isInt: true,
+              SegmentedButton<WallInputMode>(
+                segments: const [
+                  ButtonSegment(
+                    value: WallInputMode.layers,
+                    label: Text('No. of Layers'),
+                    icon: Icon(Icons.layers),
+                  ),
+                  ButtonSegment(
+                    value: WallInputMode.height,
+                    label: Text('Wall Height'),
+                    icon: Icon(Icons.height),
+                  ),
+                ],
+                selected: {state.wallInputMode},
+                onSelectionChanged: (s) {
+                  notifier.setWallInputMode(s.first);
+                  _layersCtrl.clear();
+                  _wallHeightCtrl.clear();
+                  notifier.clear();
+                },
               ),
+              const SizedBox(height: 12),
+              if (state.wallInputMode == WallInputMode.layers)
+                _NumField(
+                  controller: _layersCtrl,
+                  label: 'Number of Layers',
+                  hint: 'e.g. 4',
+                  isInt: true,
+                )
+              else ...[
+                DropdownButtonFormField<String>(
+                  value: state.wallHeightUnit,
+                  decoration: const InputDecoration(
+                    labelText: 'Wall Height Unit',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  items: wallHeightUnitToFeet.keys
+                      .map((u) => DropdownMenuItem(value: u, child: Text(u)))
+                      .toList(),
+                  onChanged: (v) { notifier.setWallHeightUnit(v!); notifier.clear(); },
+                ),
+                const SizedBox(height: 12),
+                _NumField(
+                  controller: _wallHeightCtrl,
+                  label: 'Desired Wall Height',
+                  hint: 'e.g. 10',
+                ),
+              ],
               const SizedBox(height: 12),
               _NumField(
                 controller: _costCtrl,
@@ -159,6 +217,10 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
                   totalBricks: state.totalBricks!,
                   totalCost: state.totalCost,
                   wallHeightFt: state.wallHeightFt!,
+                  computedLayers: state.computedLayers!,
+                  requestedHeightFt: state.wallInputMode == WallInputMode.height
+                      ? _requestedHeightFt(state)
+                      : null,
                 ),
               ],
             ],
@@ -166,6 +228,12 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
         ),
       ),
     );
+  }
+
+  double? _requestedHeightFt(BrickState state) {
+    final v = double.tryParse(_wallHeightCtrl.text);
+    if (v == null) return null;
+    return v * wallHeightUnitToFeet[state.wallHeightUnit]!;
   }
 
   Widget _sectionLabel(BuildContext context, String text) => Text(
@@ -180,7 +248,6 @@ class _BrickScreenState extends ConsumerState<BrickScreen> {
 class _DimField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
-
   const _DimField({required this.controller, required this.label});
 
   @override
@@ -250,20 +317,20 @@ class _ResultCard extends StatelessWidget {
   final int totalBricks;
   final double? totalCost;
   final double wallHeightFt;
+  final int computedLayers;
+  final double? requestedHeightFt;
 
   const _ResultCard({
     required this.totalBricks,
     required this.wallHeightFt,
+    required this.computedLayers,
     this.totalCost,
+    this.requestedHeightFt,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final totalInches = (wallHeightFt * 12).round();
-    final feet = totalInches ~/ 12;
-    final inches = totalInches % 12;
-    final heightStr = inches == 0 ? '$feet ft' : '$feet ft $inches in';
 
     return Card(
       color: theme.colorScheme.primaryContainer,
@@ -281,15 +348,36 @@ class _ResultCard extends StatelessWidget {
               ),
             ),
             const Divider(height: 24),
-            Text('Wall Height', style: theme.textTheme.labelLarge),
+            Text('Layers', style: theme.textTheme.labelLarge),
             const SizedBox(height: 6),
             Text(
-              heightStr,
+              '$computedLayers',
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.onPrimaryContainer,
               ),
             ),
+            const Divider(height: 24),
+            Text('Wall Height (achieved)', style: theme.textTheme.labelLarge),
+            const SizedBox(height: 6),
+            Text(
+              _fmtHeight(wallHeightFt),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
+            if (requestedHeightFt != null &&
+                (wallHeightFt - requestedHeightFt!).abs() > 0.001) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Requested: ${_fmtHeight(requestedHeightFt!)}  •  Rounded up to fit full bricks',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.secondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
             if (totalCost != null) ...[
               const Divider(height: 24),
               Text('Estimated Cost', style: theme.textTheme.labelLarge),
@@ -306,6 +394,13 @@ class _ResultCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _fmtHeight(double ft) {
+    final totalInches = (ft * 12).round();
+    final f = totalInches ~/ 12;
+    final i = totalInches % 12;
+    return i == 0 ? '$f ft' : '$f ft $i in';
   }
 
   String _fmt(int n) {

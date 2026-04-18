@@ -55,3 +55,4 @@ APK is auto-copied to `/home/navdeep/House/house-app.apk` after each build.
 - [x] Feature 1: Land unit converter (area ↔ area, L×B → area)
 - [x] Feature 2: Brick calculator — boundary wall bricks, wall height, cost estimate. Custom brick dimensions (default 9×4×4 inches), 2 parallel rows.
 - [x] Feature 3: Cement & Sand calculator — mortar ratio (1:3/1:4/1:6), bags of cement + cft of sand for boundary wall, optional cost per bag/cft.
+- [x] Feature 4: Cost Estimator — combines bricks + cement + sand + labor. Labor: mason & laborer day rates, dynamic per-day entry (variable headcount per day).
